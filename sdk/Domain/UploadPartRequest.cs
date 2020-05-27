@@ -64,7 +64,17 @@ namespace Aliyun.OSS
         /// Gets or sets the progress callback.
         /// </summary>
         public EventHandler<StreamTransferProgressArgs> StreamTransferProgress { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets the reqeust payer
+        /// </summary>
+        public RequestPayer RequestPayer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the traffic limit, the unit is bit/s
+        /// </summary>
+        public long TrafficLimit { get; set; }
+
         public UploadPartRequest(string bucketName, string key, string uploadId)
         {            
             BucketName = bucketName;

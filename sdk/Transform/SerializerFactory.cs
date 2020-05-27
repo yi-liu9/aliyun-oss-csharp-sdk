@@ -64,9 +64,39 @@ namespace Aliyun.OSS.Transform
             return new SetBucketLifecycleRequestSerializer(CreateContentSerializer<LifecycleConfiguration>());
         }
 
-        public ISerializer<StorageClass, Stream> CreateCreateBucketSerialization()
+        public ISerializer<CreateBucketRequest, Stream> CreateCreateBucketSerialization()
         {
             return new CreateBucketRequestSerializer(CreateContentSerializer<CreateBucketRequestModel>());
+        }
+
+        public ISerializer<SetBucketTaggingRequest, Stream> CreateSetBucketTaggingRequestSerializer()
+        {
+            return new SetBucketTaggingRequestSerializer(CreateContentSerializer<Tagging>());
+        }
+
+        public ISerializer<SetObjectTaggingRequest, Stream> CreateSetObjectTaggingRequestSerializer()
+        {
+            return new SetObjectTaggingRequestSerializer(CreateContentSerializer<Tagging>());
+        }
+
+        public ISerializer<SetBucketRequestPaymentRequest, Stream> CreateSetBucketRequestPaymentRequestSerializer()
+        {
+            return new SetBucketRequestPaymentRequestSerializer(CreateContentSerializer<RequestPaymentConfiguration>());
+        }
+
+        public ISerializer<SetBucketEncryptionRequest, Stream> CreateSetBucketEncryptionRequestSerializer()
+        {
+            return new SetBucketEncryptionRequestSerializer(CreateContentSerializer<ServerSideEncryptionRule>());
+        }
+
+        public ISerializer<SetBucketVersioningRequest, Stream> CreateSetBucketVersioningRequestSerializer()
+        {
+            return new SetBucketVersioningRequestSerializer(CreateContentSerializer<VersioningConfiguration>());
+        }
+
+        public ISerializer<DeleteObjectVersionsRequest, Stream> CreateDeleteObjectVersionsRequestSerializer()
+        {
+            return new DeleteObjectVersionsRequestSerializer(CreateContentSerializer<DeleteObjectVersionsRequestModel>());
         }
     }
 

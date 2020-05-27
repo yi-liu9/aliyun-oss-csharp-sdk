@@ -89,6 +89,11 @@ namespace Aliyun.OSS.Transform
             return new GetBucketStorageCapacityResultDeserializer(CreateContentDeserializer<BucketStorageCapacityModel>());
         }
 
+        public IDeserializer<ServiceResponse, GetBucketPolicyResult> CreateGetBucketPolicyDeserializer()
+        {
+            return new GetBucketPolicyDeserializer(CreateContentDeserializer<GetBucketPolicyResult>());
+        }
+
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         public IDeserializer<ServiceResponse, PutObjectResult> CreatePutObjectReusltDeserializer(PutObjectRequest request)
         {
@@ -96,7 +101,7 @@ namespace Aliyun.OSS.Transform
         }
 
         [SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        public IDeserializer<ServiceResponse, AppendObjectResult> CreateAppendObjectReusltDeserializer()
+        public IDeserializer<ServiceResponse, AppendObjectResult> CreateAppendObjectResultDeserializer()
         {
             return new AppendObjectResponseDeserializer();
         }
@@ -116,6 +121,11 @@ namespace Aliyun.OSS.Transform
         public IDeserializer<ServiceResponse, ObjectListing> CreateListObjectsResultDeserializer()
         {
             return new ListObjectsResponseDeserializer(CreateContentDeserializer<ListBucketResult>());
+        }
+
+        public IDeserializer<ServiceResponse, ObjectVersionList> CreateListObjectVersionsResultDeserializer()
+        {
+            return new ListObjectVersionsResponseDeserializer(CreateContentDeserializer<ListVersionsResult>());
         }
 
         public IDeserializer<ServiceResponse, MultipartUploadListing> CreateListMultipartUploadsResultDeserializer()
@@ -176,6 +186,46 @@ namespace Aliyun.OSS.Transform
         public IDeserializer<ServiceResponse, RestoreObjectResult> CreateRestoreObjectResultDeserializer()
         {
             return new RestoreObjectResultDeserializer(CreateContentDeserializer<ErrorResult>());
+        }
+
+        public IDeserializer<ServiceResponse, GetBucketTaggingResult> CreateGetBucketTaggingResultDeserializer()
+        {
+            return new GetBucketTaggingResultDeserializer(CreateContentDeserializer<Tagging>());
+        }
+
+        public IDeserializer<ServiceResponse, GetObjectTaggingResult> CreateGetObjectTaggingResultDeserializer()
+        {
+            return new GetObjectTaggingResultDeserializer(CreateContentDeserializer<Tagging>());
+        }
+
+        public IDeserializer<ServiceResponse, GetBucketRequestPaymentResult> CreateGetBucketRequestPaymentResultDeserializer()
+        {
+            return new GetBucketRequestPaymentResultDeserializer(CreateContentDeserializer<RequestPaymentConfiguration>());
+        }
+
+        public IDeserializer<ServiceResponse, BucketEncryptionResult> CreateGetBucketEncryptionResultDeserializer()
+        {
+            return new GetBucketEncryptionResultDeserializer(CreateContentDeserializer<ServerSideEncryptionRule>());
+        }
+
+        public IDeserializer<ServiceResponse, GetBucketVersioningResult> CreateGetBucketVersioningResultDeserializer()
+        {
+            return new GetBucketVersioningResultDeserializer(CreateContentDeserializer<VersioningConfiguration>());
+        }
+
+        public IDeserializer<ServiceResponse, DeleteObjectVersionsResult> CreateDeleteObjectVersionsResultDeserializer()
+        {
+            return new DeleteObjectVersionsResultDeserializer(CreateContentDeserializer<DeleteObjectVersionsResultModel>());
+        }
+
+        public IDeserializer<ServiceResponse, CreateSymlinkResult> CreateCreateSymlinkResultDeserializer()
+        {
+            return new CreateSymlinkResultDeserializer(CreateContentDeserializer<Stream>());
+        }
+
+        public IDeserializer<ServiceResponse, DeleteObjectResult> CreateDeleteObjectResultDeserializer()
+        {
+            return new DeleteObjectResultDeserializer(CreateContentDeserializer<Stream>());
         }
     }
 

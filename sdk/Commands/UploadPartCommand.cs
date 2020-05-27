@@ -52,6 +52,14 @@ namespace Aliyun.OSS.Commands
                 var headers = base.Headers;
                 headers[HttpHeaders.ContentLength] = _uploadPartRequest.PartSize.ToString();
                 headers[HttpHeaders.ContentMd5] = _uploadPartRequest.Md5Digest;
+                if (_uploadPartRequest.RequestPayer == RequestPayer.Requester)
+                {
+                    headers.Add(OssHeaders.OssRequestPayer, RequestPayer.Requester.ToString().ToLowerInvariant());
+                }
+                if (_uploadPartRequest.TrafficLimit > 0)
+                {
+                    headers.Add(OssHeaders.OssTrafficLimit, _uploadPartRequest.TrafficLimit.ToString());
+                }
                 return headers;
             }
         }

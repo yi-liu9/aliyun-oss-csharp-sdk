@@ -36,6 +36,15 @@ namespace Aliyun.OSS.Model
 
         [XmlElement("Transition")]
         public LifecycleRuleTransition[] Transition { get; set; }
+
+        [XmlElement("Tag")]
+        public LifecycleRuleTag[] Tags { get; set; }
+
+        [XmlElement("NoncurrentVersionExpiration")]
+        public LifecycleRuleNoncurrentVersionExpiration NoncurrentVersionExpiration { get; set; }
+
+        [XmlElement("NoncurrentVersionTransition")]
+        public LifecycleRuleNoncurrentVersionTransition[] NoncurrentVersionTransition { get; set; }
     }
 
     public class Expiration
@@ -77,10 +86,47 @@ namespace Aliyun.OSS.Model
         {
             return Date != null;
         }
+
+        [XmlElement("ExpiredObjectDeleteMarker", IsNullable = true)]
+        public bool? ExpiredObjectDeleteMarker { get; set; }
+
+        public bool ShouldSerializeExpiredObjectDeleteMarker()
+        {
+            return ExpiredObjectDeleteMarker != null;
+        }
+
+        public bool IsSetExpiredObjectDeleteMarker()
+        {
+            return ExpiredObjectDeleteMarker != null;
+        }
     }
 
     public class LifecycleRuleTransition : Expiration
     {
+        [XmlElement("StorageClass")]
+        public StorageClass StorageClass { get; set; }
+    }
+
+    public class LifecycleRuleTag
+    {
+        [XmlElement("Key")]
+        public string Key { get; set; }
+
+        [XmlElement("Value")]
+        public string Value { get; set; }
+    }
+
+    public class LifecycleRuleNoncurrentVersionExpiration
+    {
+        [XmlElement("NoncurrentDays")]
+        public int NoncurrentDays { get; set; }
+    }
+
+    public class LifecycleRuleNoncurrentVersionTransition
+    {
+        [XmlElement("NoncurrentDays")]
+        public int NoncurrentDays { get; set; }
+
         [XmlElement("StorageClass")]
         public StorageClass StorageClass { get; set; }
     }

@@ -74,7 +74,22 @@ namespace Aliyun.OSS
         /// Otherwise return 412 as HTTP code (precondition failed)
         /// </summary>   
         public DateTime? ModifiedSinceConstraint { get; set; }
-        
+
+        /// <summary>
+        /// Gets or sets the reqeust payer
+        /// </summary>
+        public RequestPayer RequestPayer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the traffic limit, the unit is bit/s
+        /// </summary>
+        public long TrafficLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the source key version id
+        /// </summary>
+        public string SourceVersionId { get; set; }
+
         /// <summary>
         /// Creates a new <see cref="CopyObjectRequest" /> instance
         /// </summary>
@@ -97,6 +112,10 @@ namespace Aliyun.OSS
         internal void Populate(IDictionary<string, string> headers)
         {
             var copyHeaderValue = OssUtils.BuildCopyObjectSource(SourceBucketName, SourceKey);
+            if (!string.IsNullOrEmpty(SourceVersionId))
+            {
+                copyHeaderValue = copyHeaderValue + "?versionId=" + SourceVersionId;
+            }
             headers.Add(OssHeaders.CopyObjectSource, copyHeaderValue);
 
             if (ModifiedSinceConstraint != null)
@@ -131,6 +150,16 @@ namespace Aliyun.OSS
             // Remove Content-Length header, ObjectMeta#Populate will create 
             // ContentLength header, but we do not need it for the request body is empty.
             headers.Remove(HttpHeaders.ContentLength);
+
+            if (RequestPayer == RequestPayer.Requester)
+            {
+                headers.Add(OssHeaders.OssRequestPayer, RequestPayer.Requester.ToString().ToLowerInvariant());
+            }
+
+            if (TrafficLimit > 0)
+            {
+                headers.Add(OssHeaders.OssTrafficLimit, TrafficLimit.ToString());
+            }
         }
     }
 

@@ -7,15 +7,15 @@
 using System;
 using System.Collections.Generic;
 using Aliyun.OSS.Common.Communication;
+using Aliyun.OSS.Transform;
 using Aliyun.OSS.Util;
 
 
 namespace Aliyun.OSS.Commands
 {
-    internal class DeleteObjectCommand : OssCommand
+    internal class DeleteObjectCommand : OssCommand <DeleteObjectResult>
     {
-        private readonly string _bucketName;
-        private readonly string _key;
+        private readonly DeleteObjectRequest _request;
 
         protected override HttpMethod Method
         {
@@ -24,40 +24,60 @@ namespace Aliyun.OSS.Commands
 
         protected override string Bucket
         {
-            get { return _bucketName; }
+            get { return _request.BucketName; }
         }
         
         protected override string Key
         {
-            get { return _key; }
+            get { return _request.Key; }
+        }
+
+        protected override IDictionary<string, string> Headers
+        {
+            get
+            {
+                var headers = base.Headers;
+                if (_request.RequestPayer == RequestPayer.Requester)
+                {
+                    headers.Add(OssHeaders.OssRequestPayer, RequestPayer.Requester.ToString().ToLowerInvariant());
+                }
+                return headers;
+            }
         }
 
         protected override IDictionary<string, string> Parameters
         {
             get
             {
-                return new Dictionary<string, string>()
+                var parameters = new Dictionary<string, string>()
                 {
                     {RequestParameters.ENCODING_TYPE, HttpUtils.UrlEncodingType }
                 };
+                if (!string.IsNullOrEmpty(_request.VersionId))
+                {
+                    parameters.Add(RequestParameters.SUBRESOURCE_VERSIONID, _request.VersionId);
+                }
+                return parameters;
             }
         }
 
         private DeleteObjectCommand(IServiceClient client, Uri endpoint, ExecutionContext context,
-                                    string bucketName, string key)
-            : base(client, endpoint, context)
+                                    IDeserializer<ServiceResponse, DeleteObjectResult> deserialize,
+                                    DeleteObjectRequest request)
+            : base(client, endpoint, context, deserialize)
         {
-            OssUtils.CheckBucketName(bucketName);
-            OssUtils.CheckObjectKey(key);
+            OssUtils.CheckBucketName(request.BucketName);
+            OssUtils.CheckObjectKey(request.Key);
 
-            _bucketName = bucketName;
-            _key = key;
+            _request = request;
         }
 
         public static DeleteObjectCommand Create(IServiceClient client, Uri endpoint, ExecutionContext context,
-                                                 string bucketName, string key)
+                                                 DeleteObjectRequest request)
         {
-            return new DeleteObjectCommand(client, endpoint, context, bucketName, key);
+            return new DeleteObjectCommand(client, endpoint, context,
+                DeserializerFactory.GetFactory().CreateDeleteObjectResultDeserializer(),
+                request);
         }
     }
 }

@@ -7,7 +7,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 namespace Aliyun.OSS.Test.Util
@@ -234,6 +236,11 @@ namespace Aliyun.OSS.Test.Util
             Thread.Sleep(5 * 1000);
         }
 
+        public static void WaitForCacheExpire(int sec)
+        {
+            Thread.Sleep(sec * 1000);
+        }
+
         public static int CalculatePartCount(long totalSize, int singleSize)
         {
             // Calculate the part count
@@ -274,6 +281,28 @@ namespace Aliyun.OSS.Test.Util
                 list.Add(entry);
             }
             return list;
+        }
+
+        public static bool IsIp(string ip)
+        {
+            return Regex.IsMatch(ip, @"^((2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$");
+        }
+
+        public static string GetIpByEndpoint(string endpoint)
+        {
+            if (IsIp(endpoint))
+            {
+                return endpoint;
+            }
+
+            var uri = new Uri(endpoint);
+            if (IsIp(uri.Host))
+            {
+                return uri.Host;
+            }
+
+            var ips = Dns.GetHostEntry(uri.Host);
+            return ips.AddressList[0].ToString();
         }
     }
 }

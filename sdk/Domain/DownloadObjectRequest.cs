@@ -153,6 +153,21 @@ namespace Aliyun.OSS
             get { return _responseHeaders; }
         }
 
+        /// <summary>
+        /// Gets or sets the reqeust payer
+        /// </summary>
+        public RequestPayer RequestPayer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the traffic limit, the unit is bit/s
+        /// </summary>
+        public long TrafficLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version id
+        /// </summary>
+        public string VersionId { get; set; }
+
         internal GetObjectRequest ToGetObjectRequest()
         {
             GetObjectRequest request = new GetObjectRequest(BucketName, Key);
@@ -169,6 +184,12 @@ namespace Aliyun.OSS
 
             request.ModifiedSinceConstraint = ModifiedSinceConstraint;
             request.UnmodifiedSinceConstraint = UnmodifiedSinceConstraint;
+
+            request.RequestPayer = RequestPayer;
+
+            request.TrafficLimit = TrafficLimit;
+
+            request.VersionId = VersionId;
 
             return request;
         }
@@ -198,6 +219,11 @@ namespace Aliyun.OSS
             {
                 headers.Add(OssHeaders.GetObjectIfNoneMatch,
                     OssUtils.JoinETag(_nonmatchingEtagConstraints));
+            }
+            if (RequestPayer == RequestPayer.Requester)
+            {
+                headers.Add(OssHeaders.OssRequestPayer,
+                    RequestPayer.Requester.ToString().ToLowerInvariant());
             }
         }
     }

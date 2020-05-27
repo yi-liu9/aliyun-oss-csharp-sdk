@@ -64,6 +64,16 @@ namespace Aliyun.OSS
         public string Process { get; set; }
 
         /// <summary>
+        /// Gets or sets the reqeust payer
+        /// </summary>
+        public RequestPayer RequestPayer { get; set; }
+
+        /// <summary>
+        /// Gets or sets the traffic limit, the unit is bit/s
+        /// </summary>
+        public long TrafficLimit { get; set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="PutObjectRequest" />
         /// </summary>
         /// <param name="bucketName">bucket name</param>
@@ -104,6 +114,14 @@ namespace Aliyun.OSS
             if (Metadata != null) 
             {
                 Metadata.Populate(headers);
+            }
+            if (RequestPayer == RequestPayer.Requester)
+            {
+                headers.Add(OssHeaders.OssRequestPayer, RequestPayer.Requester.ToString().ToLowerInvariant());
+            }
+            if (TrafficLimit > 0)
+            {
+                headers.Add(OssHeaders.OssTrafficLimit, TrafficLimit.ToString());
             }
         }
 

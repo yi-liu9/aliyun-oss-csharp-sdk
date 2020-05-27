@@ -5,7 +5,7 @@ using System.Threading;
 using Aliyun.OSS;
 using Aliyun.OSS.Common;
 using Aliyun.OSS.Test.Util;
-
+using Aliyun.OSS.Util;
 using NUnit.Framework;
 
 namespace Aliyun.OSS.Test.TestClass.BucketTestClass
@@ -293,9 +293,60 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
                 }
             }
         }
-#endregion
 
-#region Delete Bucket Cases
+        [Test]
+        public void CreateBucketByCreateBucketRequest()
+        {
+            //create a new bucket by default, acl is private, storage class is standard
+            var bucketName = OssTestUtils.GetBucketName(_className);
+            var request = new CreateBucketRequest(bucketName);
+            _ossClient.CreateBucket(request);
+            Assert.IsTrue(OssTestUtils.BucketExists(_ossClient, bucketName),
+                string.Format("Bucket {0} should exist after creation", bucketName));
+
+            var result = _ossClient.GetBucketInfo(bucketName);
+            Assert.AreEqual(result.Bucket.AccessControlList.Grant, CannedAccessControlList.Private);
+            Assert.AreEqual(result.Bucket.StorageClass, StorageClass.Standard);
+            Assert.AreEqual(result.Bucket.DataRedundancyType, DataRedundancyType.LRS);
+
+            _ossClient.DeleteBucket(bucketName);
+            OssTestUtils.WaitForCacheExpire(1);
+
+            //create a public bucket with IA 
+            bucketName = OssTestUtils.GetBucketName(_className);
+            request = new CreateBucketRequest(bucketName, StorageClass.IA, CannedAccessControlList.PublicReadWrite);
+            request.DataRedundancyType = DataRedundancyType.LRS;
+
+            _ossClient.CreateBucket(request);
+            Assert.IsTrue(OssTestUtils.BucketExists(_ossClient, bucketName),
+                string.Format("Bucket {0} should exist after creation", bucketName));
+
+            result = _ossClient.GetBucketInfo(bucketName);
+            Assert.AreEqual(result.Bucket.AccessControlList.Grant, CannedAccessControlList.PublicReadWrite);
+            Assert.AreEqual(result.Bucket.StorageClass, StorageClass.IA);
+            Assert.AreEqual(result.Bucket.DataRedundancyType, DataRedundancyType.LRS);
+
+            _ossClient.DeleteBucket(bucketName);
+
+
+            //create a public bucket with IA , ZRS
+            bucketName = OssTestUtils.GetBucketName(_className);
+            request = new CreateBucketRequest(bucketName, StorageClass.IA, CannedAccessControlList.PublicReadWrite);
+            request.DataRedundancyType = DataRedundancyType.ZRS;
+            _ossClient.CreateBucket(request);
+            Assert.IsTrue(OssTestUtils.BucketExists(_ossClient, bucketName),
+                string.Format("Bucket {0} should exist after creation", bucketName));
+
+            result = _ossClient.GetBucketInfo(bucketName);
+            Assert.AreEqual(result.Bucket.AccessControlList.Grant, CannedAccessControlList.PublicReadWrite);
+            Assert.AreEqual(result.Bucket.StorageClass, StorageClass.IA);
+            Assert.AreEqual(result.Bucket.DataRedundancyType, DataRedundancyType.ZRS);
+
+            _ossClient.DeleteBucket(bucketName);
+        }
+        #endregion
+
+        #region Delete Bucket Cases
         [Test]
         public void DeleteNonExistBucketTest()
         {
@@ -382,13 +433,60 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
                 Assert.True(false, e.Message);
             }
         }
-#endregion
 
-#region List Buckets
+        [Test]
+        public void DoesBucketExistTestWithException()
+        {
+            try
+            {
+                _ossClient.DoesBucketExist("");
+                Assert.IsTrue(false);
+            }
+            catch (Exception e)
+            {
+                Assert.True(true, e.Message);
+            }
+
+            try
+            {
+                _ossClient.DoesBucketExist("Invalid-Bucket");
+                Assert.IsTrue(false);
+            }
+            catch (Exception e)
+            {
+                Assert.True(true, e.Message);
+            }
+
+            var bucketName1 = OssTestUtils.GetBucketName(_className);
+            try
+            {
+                var client = new OssClient(Config.Endpoint, Config.AccessKeyId, "invalid-sk");
+                _ossClient.CreateBucket(bucketName1, StorageClass.IA);
+                client.DoesBucketExist(bucketName1);
+                Assert.IsTrue(false);
+            }
+            catch (Exception e)
+            {
+                Assert.True(true, e.Message);
+            }
+            finally
+            {
+                _ossClient.DeleteBucket(bucketName1);
+            }
+        }
+        #endregion
+
+        #region List Buckets
 
         [Test]
         public void ListBucketspagingTest()
         {
+            for (int i = 0; i < 5; i++)
+            {
+                var bucketName = OssTestUtils.GetBucketName(_className);
+                _ossClient.CreateBucket(bucketName);
+            }
+
             var lbRequest = new ListBucketsRequest
             {
                 Prefix = _className,
@@ -407,6 +505,18 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
                     break;
                 }
             }
+
+            //prifix null
+            lbRequest.Prefix = null;
+            lbRequest.Marker = null;
+            lbRequest.MaxKeys = 2;
+            _ossClient.ListBuckets(lbRequest);
+
+            //MaxKeys null
+            lbRequest.Prefix = _className;
+            lbRequest.Marker = null;
+            lbRequest.MaxKeys = null;
+            _ossClient.ListBuckets(lbRequest);
         }
 
         /*
@@ -457,10 +567,12 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
                 Assert.AreEqual(bucketInfo.Bucket.AccessControlList.Grant, CannedAccessControlList.Private);
 
                 _ossClient.SetBucketAcl(bucketName, CannedAccessControlList.PublicRead);
+                OssTestUtils.WaitForCacheExpire();
                 bucketInfo = _ossClient.GetBucketInfo(bucketName);
                 Assert.AreEqual(bucketInfo.Bucket.AccessControlList.Grant, CannedAccessControlList.PublicRead);
 
                 _ossClient.SetBucketAcl(bucketName, CannedAccessControlList.PublicReadWrite);
+                OssTestUtils.WaitForCacheExpire();
                 bucketInfo = _ossClient.GetBucketInfo(bucketName);
                 Assert.AreEqual(bucketInfo.Bucket.AccessControlList.Grant, CannedAccessControlList.PublicReadWrite);
 
@@ -470,7 +582,7 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
 
                 Assert.AreEqual(bucketInfo.Bucket.StorageClass, StorageClass.IA);
                 Assert.AreEqual(bucketInfo.Bucket.Name, bucketName);
-
+                Assert.IsTrue(bucketInfo.Bucket.ToString().Contains(bucketName));
             }
             finally
             {
@@ -631,12 +743,17 @@ namespace Aliyun.OSS.Test.TestClass.BucketTestClass
             var metedata = _ossClient.GetBucketMetadata(bucketName);
             Assert.IsTrue(metedata.BucketRegion.StartsWith("oss-"),
                 string.Format("Bucket Region {0} should start with 'oss-' but actual {1}", bucketName, metedata.BucketRegion));
+            Assert.IsTrue(metedata.HttpMetadata[HttpHeaders.BucketRegion].StartsWith("oss-"),
+                string.Format("Bucket Region {0} should start with 'oss-' but actual {1}", bucketName, metedata.BucketRegion));
 
             //delete the new created bucket
             _ossClient.DeleteBucket(bucketName);
             OssTestUtils.WaitForCacheExpire();
             Assert.IsFalse(OssTestUtils.BucketExists(_ossClient, bucketName),
                 string.Format("Bucket {0} should not exist after deletion", bucketName));
+
+            var metadata = new BucketMetadata();
+            Assert.AreEqual(metadata.BucketRegion, null);
         }
 
         #endregion

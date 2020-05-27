@@ -74,6 +74,24 @@ namespace Aliyun.OSS
         public BucketACL AccessControlList { get; set; }
 
         /// <summary>
+        /// Gets or sets the disaster recovery.
+        /// </summary>
+        /// <value>The access control list.</value>
+        public DataRedundancyType DataRedundancyType { get; set; }
+
+        /// <summary>
+        /// Gets or sets server-side encryption rule.
+        /// </summary>
+        /// <value>The access control list.</value>
+        public BucketServerSideEncryptionRule ServerSideEncryptionRule { get; set; }
+
+        /// <summary>
+        /// Gets or sets versioning status.
+        /// </summary>
+        /// <value>bucket versioning status.</value>
+        public VersioningStatus Versioning { get; set; }
+
+        /// <summary>
         /// Creats a new <see cref="Bucket" /> instance with the specified name.
         /// </summary>
         /// <param name="name">Bucket name</param>
@@ -101,6 +119,16 @@ namespace Aliyun.OSS
         public class BucketACL
         {
             public CannedAccessControlList Grant { get; set; }
+        }
+
+        [XmlRoot("ServerSideEncryptionRule")]
+        public class BucketServerSideEncryptionRule
+        {
+            [XmlElement("SSEAlgorithm")]
+            public string SSEAlgorithm { get; set; }
+
+            [XmlElement("KMSMasterKeyID")]
+            public string KMSMasterKeyID { get; set; }
         }
     }
 }

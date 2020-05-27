@@ -73,6 +73,14 @@ namespace Aliyun.OSS.Commands
             {
                 var headers = new Dictionary<string, string>();
                 _request.ObjectMetadata.Populate(headers);
+                if (_request.RequestPayer == RequestPayer.Requester)
+                {
+                    headers.Add(OssHeaders.OssRequestPayer, RequestPayer.Requester.ToString().ToLowerInvariant());
+                }
+                if (_request.TrafficLimit > 0)
+                {
+                    headers.Add(OssHeaders.OssTrafficLimit, _request.TrafficLimit.ToString());
+                }
                 return headers;
             }
         }
@@ -117,7 +125,7 @@ namespace Aliyun.OSS.Commands
             }
 
             return new AppendObjectCommand(client, endpoint, context,
-                                           DeserializerFactory.GetFactory().CreateAppendObjectReusltDeserializer(),
+                                           DeserializerFactory.GetFactory().CreateAppendObjectResultDeserializer(),
                                            request);
         }
     }
